@@ -1,3 +1,4 @@
+import { startWithAssetRecovery } from "./utils/startup";
 import "pixi-spine";
 import "./style.css";
 import { Application, Assets } from "pixi.js";
@@ -22,27 +23,30 @@ const app = new Application<HTMLCanvasElement>({
     height: gameHeight,
 });
 
-window.onload = async (): Promise<void> => {
-    await loadGameAssets();
+window.onload = (): void => {
+    startWithAssetRecovery({
+        load: loadGameAssets,
+        ready: async () => {
+            document.body.appendChild(app.view);
 
-    document.body.appendChild(app.view);
+            resizeCanvas();
 
-    resizeCanvas();
+            const birdFromSprite = createBird();
+            birdFromSprite.anchor.set(0.5, 0.5);
+            birdFromSprite.position.set(gameWidth / 2, gameHeight / 4);
 
-    const birdFromSprite = createBird();
-    birdFromSprite.anchor.set(0.5, 0.5);
-    birdFromSprite.position.set(gameWidth / 2, gameHeight / 4);
+            const spineExample = await getSpine();
 
-    const spineExample = await getSpine();
+            app.stage.addChild(birdFromSprite);
+            app.stage.addChild(spineExample);
+            app.stage.interactive = true;
 
-    app.stage.addChild(birdFromSprite);
-    app.stage.addChild(spineExample);
-    app.stage.interactive = true;
-
-    if (VERSION.includes("d")) {
-        // if development version
-        attachConsole(app.stage, gameWidth, gameHeight);
-    }
+            if (VERSION.includes("d")) {
+                // if development version
+                attachConsole(app.stage, gameWidth, gameHeight);
+            }
+        },
+    });
 };
 
 async function loadGameAssets(): Promise<void> {
@@ -76,8 +80,12 @@ async function loadGameAssets(): Promise<void> {
 function resizeCanvas(): void {
     const resize = () => {
         app.renderer.resize(window.innerWidth, window.innerHeight);
-        app.stage.scale.x = window.innerWidth / gameWidth;
-        app.stage.scale.y = window.innerHeight / gameHeight;
+        const scale = Math.min(window.innerWidth / gameWidth, window.innerHeight / gameHeight);
+        app.stage.scale.set(scale);
+        app.stage.position.set(
+            (window.innerWidth - gameWidth * scale) / 2,
+            (window.innerHeight - gameHeight * scale) / 2,
+        );
     };
 
     resize();

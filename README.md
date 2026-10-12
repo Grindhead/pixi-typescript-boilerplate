@@ -39,3 +39,12 @@ Simply copy paste this and start coding
 - `npm run lint` - generate code coverage report
 
 For vscode users - ctrl ( or ⌘ ) + shift + b will run package.json's dev script ( it is set as default vscode task )
+
+
+## Dashboard task verification
+
+Failed asset fetches left a blank page and independent axis scaling stretched the game. Startup shows loading/error/retry, and resize uses one uniform scale with centered1280×720 content.
+
+Lint/production build, Chromium/Firefox asset failure and retry, and production resize-handler checks at four viewports passed.
+
+Startup and stage resizing are affected. Verify art and Spine rendering on target devices before deployment.
